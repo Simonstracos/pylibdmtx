@@ -39,7 +39,7 @@ ENCODING_SIZE_NAMES = [
 Point = namedtuple('Point', 'x y')
 
 # Results of reading a barcode
-Decoded = namedtuple('Decoded', 'data rect')
+Decoded = namedtuple('Decoded', 'data rect code')
 
 # Results of encoding data to an image
 Encoded = namedtuple('Encoded', 'width height bpp pixels')
@@ -170,7 +170,8 @@ def _decode_region(decoder, region, corrections, shrink):
 
             return Decoded(
                 string_at(msg.contents.output),
-                list(corners(decoder, region))
+                list(corners(decoder, region)),
+                string_at(msg.contents.code)
             )
         else:
             return None
