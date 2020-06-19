@@ -39,7 +39,7 @@ ENCODING_SIZE_NAMES = [
 Point = namedtuple('Point', 'x y')
 
 # Results of reading a barcode
-Decoded = namedtuple('Decoded', 'data rect code')
+Decoded = namedtuple('Decoded', 'data rect code dimensions')
 
 # Results of encoding data to an image
 Encoded = namedtuple('Encoded', 'width height bpp pixels')
@@ -168,10 +168,19 @@ def _decode_region(decoder, region, corrections, shrink):
                     dmtxMatrix3VMultiplyBy(p, region.contents.fit2raw)
                     yield Point(int((shrink * p.X) + 0.5), int((shrink * (height - p.Y - 1)) + 0.5))
 
+            corners = list(corners(decoder, region))
+
+            dimensions = {
+                "symbol_cols": region.contents.symbolCols,
+                "symbol_rows": region.contents.symbolRows,
+                "x_dimension": (corners[0].y - corners[1].y) / region.contents.symbolRows
+            }
+
             return Decoded(
                 string_at(msg.contents.output),
-                list(corners(decoder, region)),
-                string_at(msg.contents.code)
+                corners,
+                string_at(msg.contents.code),
+                dimensions
             )
         else:
             return None
